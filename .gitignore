@@ -1,1 +1,2 @@
 config.env
+#ignorar o arquivo config.env para que não seja mandando para o github, visto que tem minhas informações de login
