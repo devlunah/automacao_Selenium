@@ -7,7 +7,12 @@
 # time.sleep(5) - esperar 5 segundos antes de clicar
 # pyautogui.press('f5')
 
+# x=1467, y=427 - medidas para a barra de login no meu computador no ifac
+# x=1473, y=512 - medidas para a barra de senha no meu computador no ifac
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
 import pyautogui
 
@@ -18,15 +23,23 @@ navegador = webdriver.Chrome() # conexão com o navegador - abre o navegador e j
 # acessar um site:
 navegador.get("https://suap.ifac.edu.br")
 
-pyautogui.click(x=895, y=13)
-time.sleep(3)
-pyautogui.click(x=1467, y=427)
-pyautogui.write("3466829")
+#colocar o navegador em tela cheia 
+navegador.maximize_window()
 
-time.sleep(3)
-pyautogui.click(x=1473, y=512)
-pyautogui.write("221205#Lua")
+# aguardar até o campo de usuário estar visível
+wait = WebDriverWait(navegador, 10)
 
-pyautogui.press("enter")
+inputUsuario = wait.until(EC.presence_of_element_located((By.ID, "id_username"))) 
 
-time.sleep(20)
+inputUsuario.send_keys("3466829")
+
+inputSenha = navegador.find_element(By.ID, "id_password")
+inputSenha.send_keys("221205#Lua")
+
+# aguardar até o botão "Acessar" estar clicável
+btAcessar = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input.btn.success")))
+btAcessar.click()
+
+time.sleep(230)
+
+
