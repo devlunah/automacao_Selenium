@@ -9,10 +9,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait # função para fazer o navegador aguardar algo
 from selenium.webdriver.support import expected_conditions as EC # função para determinar qual a condição esperada para que o navegador aguarde antes de fazer algo
 from selenium.webdriver.chrome.service import Service #importa a classe Service da biblioteca do Selenium, usada para configurar como o ChromeDriver (o executável que controla o navegador Google Chrome) será inicializado.
-import time
-import pyautogui
-import os
 from dotenv import load_dotenv
+from plyer import notification
+import time
+import os
+
 
 load_dotenv("config.env")
 
@@ -22,7 +23,7 @@ senha = os.environ["SUAP_SENHA"]
 if not usuario or not senha:
     raise ValueError("Usuário ou senha não definidos nas variáveis de ambiente.")
 
-# conexão com o navegador - abre o navegador e já fecha
+
 
 service = Service(executable_path='./chromedriver.exe') #esse arquivo é o driver que o Selenium usa para "conversar" com o navegador Google Chrome.
 
@@ -48,10 +49,10 @@ wait = WebDriverWait(navegador, 10)
 
 try:
     # acessar um site:
-    navegador.get("https://suap.ifac.edu.br")
+    navegador.get("https://suap.ifac.edu.br") # conexão com o navegador - abre o navegador e já fecha
 
-    btSair = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "li.menu-logout")))
-    btSair.click()
+    #btSair = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "li.menu-logout")))
+    #btSair.click()
 
     # aguardar até o campo de usuário estar visível -> wait.until(EC.presence_of_element_located())
     inputUsuario = wait.until(EC.presence_of_element_located((By.ID, "id_username"))) 
@@ -60,7 +61,7 @@ try:
     inputSenha = navegador.find_element(By.ID, "id_password")
     inputSenha.send_keys(senha)
 
-    # aguardar até o botão "Acessar" estar clicável
+    #aguardar até o botão "Acessar" estar clicável
     btAcessar = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input.btn.success")))
     btAcessar.click()
 
@@ -72,12 +73,45 @@ try:
     acessoChamados= tempo2.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#menu-item-centraldeserviços_chamados")))
     acessoChamados.click()
 
-    input("Pressione Enter para encerrar...")
+    #atualização da página e checar se há novo chamado
+    elemento_total = navegador.find_element(By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")
+    texto_anterior = elemento_total.text.strip()
 
-except:
+    
+    while True:
+        time.sleep(30)
+        navegador.refresh()
+        time.sleep(2)  # espera rápida para o site recarregar
+
+        elemento_total = tempo2.until(EC.presence_of_element_located((By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")))
+        texto_atual = elemento_total.text.strip()
+
+        if texto_atual != texto_anterior:
+            title = "Novo chamado!"
+            message = "Verificar no SUAP"
+            timeout = 10
+
+            notification.notify(title = title, message = message , timeout = timeout)
+            #print(f"Novo chamado detectado! Anterior: {texto_anterior} → Atual: {texto_atual}")
+            texto_anterior = texto_atual 
+
+        else:
+            title = "Nenhum novo chamado!"
+            message = "Nada novo :)"
+            timeout = 10
+
+            notification.notify(title = title, message = message , timeout = timeout)
+            texto_anterior = texto_atual 
+            #print("Nenhum novo chamado.")
+
+except KeyboardInterrupt:
+    input("Pressione Enter para sair...")
+
+except Exception as e:
     print("Erro durante a automação:")
     input("Pressione Enter para sair...")
 
 finally:
-
+    btSair = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "li.menu-logout")))
+    btSair.click()
     navegador.quit()
