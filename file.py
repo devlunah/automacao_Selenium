@@ -1,19 +1,17 @@
 # automação para recarregar a página do SUAP automaticamente a cada 30 segundos
 # e notificar quando tem um novo chamado
 
-# x=1467, y=427 - medidas para a barra de login no meu computador no ifac
-# x=1473, y=512 - medidas para a barra de senha no meu computador no ifac
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait # função para fazer o navegador aguardar algo
 from selenium.webdriver.support import expected_conditions as EC # função para determinar qual a condição esperada para que o navegador aguarde antes de fazer algo
 from selenium.webdriver.chrome.service import Service #importa a classe Service da biblioteca do Selenium, usada para configurar como o ChromeDriver (o executável que controla o navegador Google Chrome) será inicializado.
 from dotenv import load_dotenv
-from plyer import notification
+from winotify import Notification, audio
 import time
 import os
-
+import threading
+import re
 
 load_dotenv("config.env")
 
@@ -31,13 +29,19 @@ service = Service(executable_path='./chromedriver.exe') #esse arquivo é o drive
 options = webdriver.ChromeOptions() 
 
 #definir usuário para abrir o navegador
-options.add_argument(r"user-data-dir=C:\SeleniumProfiles\Profile_Clone_Automacao")
+options.add_argument(r"user-data-dir=C:/SeleniumProfiles/UserData_Clone")
+options.add_argument("profile-directory=Default")
 options.add_argument("--disable-extensions") #Desativa todas as extensões do Chrome (como AdBlock, LastPass, etc.)
 options.add_argument("--disable-gpu") #Desativa o uso da GPU (placa de vídeo) para aceleração gráfica no Chrome.
 options.add_argument("--no-sandbox") #Desativa o "sandboxing" do Chrome (isolamento de processos por segurança).
 options.add_argument("--disable-dev-shm-usage") #Evita que o Chrome use a pasta /dev/shm (shared memory) para armazenar dados temporários.
 
-options.add_argument("--start-maximized")
+# Não exibe o Navegador
+options.add_argument("--headless=new")  # novo modo headless do Chrome 109+
+options.add_argument("--window-size=1920,1080")  # evita erros de resolução
+
+# Exibe o Navegador
+# options.add_argument("--start-maximized")
 
 #Essa é a linha que realmente inicializa o navegador Chrome com o Selenium. 
 # Usa o chromedriver.exe configurado no Service;
@@ -46,6 +50,16 @@ navegador = webdriver.Chrome(service=service, options=options)
 
 #definição da variável de tempo de espera
 wait = WebDriverWait(navegador, 10)
+
+parar = False
+
+def finalizar_Enter():
+    global parar
+    while not parar:
+        time.sleep(1)
+    print("Thread finalizada.")
+
+t = threading.Thread(target=finalizar_Enter).start()
 
 try:
     # acessar um site:
@@ -72,44 +86,65 @@ try:
 
     acessoChamados= tempo2.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#menu-item-centraldeserviços_chamados")))
     acessoChamados.click()
+    x_path_total_chamados = ''
 
     #atualização da página e checar se há novo chamado
     elemento_total = navegador.find_element(By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")
     texto_anterior = elemento_total.text.strip()
+    print(f"texto_anterior = {texto_anterior}")
 
+    numeroAnt = re.search(r'\d+', texto_anterior)
+
+    numero_anterior = None
+    if numeroAnt:
+        numero_anterior = int(numeroAnt.group())
+
+
+    print(numero_anterior)
     
     while True:
-        time.sleep(30)
+        time.sleep(120)
         navegador.refresh()
         time.sleep(2)  # espera rápida para o site recarregar
 
         elemento_total = tempo2.until(EC.presence_of_element_located((By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")))
         texto_atual = elemento_total.text.strip()
 
-        if texto_atual != texto_anterior:
-            title = "Novo chamado!"
-            message = "Verificar no SUAP"
-            timeout = 10
 
-            notification.notify(title = title, message = message , timeout = timeout)
+        
+        numeroAtual = re.search(r'\d+', texto_atual)
+        numero_atual = None
+        if numeroAtual:
+            numero_atual = int(numeroAtual.group())
+
+        print(f"numero_atual = {numero_atual}")
+
+        if numero_anterior and numero_atual and numero_atual != numero_anterior:
+            toast = Notification(app_id="SUAP",
+                                title="Novo chamado detectado!",
+                                msg="Verifique o SUAP agora.")  
+            toast.set_audio(audio.Default, loop=False)
+            toast.show()
             #print(f"Novo chamado detectado! Anterior: {texto_anterior} → Atual: {texto_atual}")
             texto_anterior = texto_atual 
 
         else:
-            title = "Nenhum novo chamado!"
-            message = "Nada novo :)"
-            timeout = 10
-
-            notification.notify(title = title, message = message , timeout = timeout)
+            toast = Notification(app_id="SUAP",
+                                title="Nada novo :)",
+                                msg="Nenhum novo chamado foi localizado!")  
+            toast.set_audio(audio.Default, loop=False)
+            toast.show()
             texto_anterior = texto_atual 
             #print("Nenhum novo chamado.")
 
 except KeyboardInterrupt:
-    input("Pressione Enter para sair...")
-
+    print("Finalizando o programa...")
+    parar = True
+    
 except Exception as e:
-    print("Erro durante a automação:")
+    print(f"Erro durante a automação: {e}")
     input("Pressione Enter para sair...")
+    parar = True
 
 finally:
     btSair = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "li.menu-logout")))
