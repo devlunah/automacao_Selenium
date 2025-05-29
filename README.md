@@ -1,4 +1,4 @@
-# 🛠️ Automação SUAP - Monitor de Chamados com Flask
+# 🛠️ Automação SUAP - Gerenciamento de Chamados
 
 Este projeto realiza uma automação com **Python + Selenium + Flask**, que acessa o SUAP do IFAC, realiza login automático e monitora continuamente a Central de Chamados. Quando um novo chamado é detectado, o sistema emite uma **notificação no Windows** com som e botão de ação.
 
