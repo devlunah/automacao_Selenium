@@ -1,0 +1,1 @@
+# Substitua este arquivo pelo script principal monitor_chamados_com_flask.py
