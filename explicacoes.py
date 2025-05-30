@@ -8,6 +8,11 @@
 # pyautogui.press('f5')
 #pyautogui.PAUSE = 0.05
 
+#MOUSEINFO
+# import mouseinfo
+# import time
+# time.sleep(5)
+# mouseinfo.mouseInfo()
 
 #SELENIUM
 #colocar o navegador em tela cheia - navegador.maximize_window()
@@ -48,3 +53,13 @@
 #excludeSwitches: remove a mensagem "Chrome está sendo controlado por um software de teste automatizado".
 
 #useAutomationExtension: desativa a extensão Selenium interna, que também pode denunciar a automação.
+
+#WINOTIFY
+
+# from winotify import Notification, audio
+
+# toast = Notification(app_id="SUAP",
+#                      title="Novo chamado detectado!",
+#                      msg="Verifique o SUAP agora.")  
+# toast.set_audio(audio.Default, loop=False)
+# toast.show()
