@@ -6,3 +6,61 @@ venv/
 __pycache__/
 *.pyc
 config.env
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambiente virtual
+venv/
+ENV/
+env/
+.venv/
+.ENV/
+
+# Arquivos de configuração e variáveis sensíveis
+*.env
+config.env
+config.env.*
+
+# Log files
+*.log
+
+# Dependências específicas de sistema
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# Arquivos do PyInstaller
+*.spec
+dist/
+build/
+
+# Executáveis e instaladores
+*.exe
+*.msi
+*.zip
+
+# ChromeDriver
+chromedriver.exe
+
+# Outros
+coverage/
+htmlcov/

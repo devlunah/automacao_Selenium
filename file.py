@@ -101,7 +101,7 @@ try:
     print(numero_anterior)
     
     while True:
-        time.sleep(120)
+        time.sleep(30)
         navegador.refresh()
         time.sleep(2)  # espera rápida para o site recarregar
 
@@ -130,20 +130,25 @@ try:
                 numero_anterior = numero_atual
 
         else:
-            notificacao = Notification(app_id="SUAP",
-                                title="Nada novo :)",
-                                msg="Nenhum novo chamado foi localizado!")  
-            notificacao.set_audio(audio.Default, loop=False)
-            notificacao.show()
+            # notificacao = Notification(app_id="SUAP",
+            #                     title="Nada novo :)",
+            #                     msg="Nenhum novo chamado foi localizado!")  
+            # notificacao.set_audio(audio.Default, loop=False)
+            # notificacao.show()
             texto_anterior = texto_atual 
             numero_atual = numero_anterior
-            #print("Nenhum novo chamado.")
+            # #print("Nenhum novo chamado.")
 
 except KeyboardInterrupt:
     print("Finalizando o programa...")
     parar = True
     
 except Exception as e:
+    notificacao = Notification(app_id="Python",
+                    title="Erro na automação",
+                    msg="Verificar")  
+    notificacao.set_audio(audio.Default, loop=False)
+    notificacao.show()
     print(f"Erro durante a automação: {e}")
     input("Pressione Enter para sair...")
     parar = True
