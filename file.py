@@ -13,7 +13,6 @@ from flask import Flask, redirect
 import threading
 import time
 import os
-import threading
 import re
 
 # importação do usuário e senha definido no arquivo .env
@@ -136,7 +135,7 @@ try:
             # notificacao.set_audio(audio.Default, loop=False)
             # notificacao.show()
             texto_anterior = texto_atual 
-            numero_atual = numero_anterior
+            numero_anterior = numero_atual
             # #print("Nenhum novo chamado.")
 
 except KeyboardInterrupt:
