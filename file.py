@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC 
 from selenium.webdriver.chrome.service import Service 
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import NoSuchElementException
 from dotenv import load_dotenv
 from winotify import Notification, audio
 from flask import Flask, redirect
@@ -86,9 +88,15 @@ try:
     acessoChamados= tempo2.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#menu-item-centraldeserviços_chamados")))
     acessoChamados.click()
     x_path_total_chamados = ''
+    
+    try:
+        elemento_total = navegador.find_element(By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")
+        texto_anterior = elemento_total.text.strip()
 
-    elemento_total = navegador.find_element(By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")
-    texto_anterior = elemento_total.text.strip()
+    except NoSuchElementException:
+        texto_anterior = "Total de 0 item"
+        numero_anterior = 0
+
     print(f"texto_anterior = {texto_anterior}")
 
     numeroAnt = re.search(r'\d+', texto_anterior)
@@ -96,7 +104,6 @@ try:
     numero_anterior = None
     if numeroAnt:
         numero_anterior = int(numeroAnt.group())
-
     print(numero_anterior)
     
     while True:
@@ -104,16 +111,19 @@ try:
         navegador.refresh()
         time.sleep(2)  # espera rápida para o site recarregar
 
-        elemento_total = tempo2.until(EC.presence_of_element_located((By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")))
-        texto_atual = elemento_total.text.strip()
+        try:
+            elemento_total = tempo2.until(EC.presence_of_element_located((By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")))
+            texto_atual = elemento_total.text.strip()
+        except TimeoutException:
+            texto_atual = "Total de 0 item"
+            numero_atual = 0
         
         numeroAtual = re.search(r'\d+', texto_atual)
         numero_atual = None
-
         if numeroAtual:
             numero_atual = int(numeroAtual.group())
-
         print(f"numero_atual = {numero_atual}")
+
         print(texto_atual)
 
         if numero_anterior and numero_atual and numero_atual != numero_anterior and numero_atual > numero_anterior:
@@ -129,14 +139,8 @@ try:
                 numero_anterior = numero_atual
 
         else:
-            # notificacao = Notification(app_id="SUAP",
-            #                     title="Nada novo :)",
-            #                     msg="Nenhum novo chamado foi localizado!")  
-            # notificacao.set_audio(audio.Default, loop=False)
-            # notificacao.show()
             texto_anterior = texto_atual 
             numero_anterior = numero_atual
-            # #print("Nenhum novo chamado.")
 
 except KeyboardInterrupt:
     print("Finalizando o programa...")
