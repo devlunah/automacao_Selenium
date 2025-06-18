@@ -126,7 +126,7 @@ try:
 
         print(texto_atual)
 
-        if numero_anterior and numero_atual and numero_atual != numero_anterior and numero_atual > numero_anterior:
+        if numero_anterior is not None and numero_atual is not None and numero_atual != numero_anterior and numero_atual > numero_anterior:
             notificacao = Notification(app_id="SUAP",
                                 title="Novo chamado detectado!",
                                 msg="Verifique o SUAP agora.")  
@@ -160,3 +160,9 @@ finally:
     btSair = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "li.menu-logout")))
     btSair.click()
     navegador.quit()
+
+    #msg_semChamados = navegador.find_element(By.XPATH, "//*[@id='content']/div[5]/div/p") 
+            # if msg_semChamados:
+            #     print("Não há chamados")
+            #     texto_anterior = "Total de 0 item"
+            #     numero_anterior = 0
