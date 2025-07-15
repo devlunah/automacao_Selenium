@@ -4,6 +4,7 @@
 
 #BIBLIOTECAS:
 # from selenium import webdriver
+# from webdriver_manager.chrome import ChromeDriverManager
 # from selenium.webdriver.common.by import By
 # from selenium.webdriver.support.ui import WebDriverWait # função para fazer o navegador aguardar algo
 # from selenium.webdriver.support import expected_conditions as EC # função para determinar qual a condição esperada para que o navegador aguarde antes de fazer algo

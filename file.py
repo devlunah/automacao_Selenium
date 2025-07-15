@@ -3,6 +3,7 @@
 
 # bibliotecas:
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC 
@@ -30,15 +31,16 @@ if not usuario or not senha:
 service = Service(executable_path='./chromedriver.exe')
 options = webdriver.ChromeOptions() 
 
-options.add_argument(r"user-data-dir=C:/SeleniumProfiles/UserData_Clone")
-options.add_argument("profile-directory=Default")
+# options.add_argument(r"--user-data-dir=C:/SeleniumProfiles/UserData_Clone")
+# options.add_argument("--profile-directory=Default")
 options.add_argument("--disable-extensions")
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
-options.add_argument("--headless=new")
-options.add_argument("--window-size=1920,1080")
-#options.add_argument("--start-maximized")
+# options.add_argument("--headless=new")
+# options.add_argument("--window-size=1920,1080")
+options.add_argument("--start-maximized")
+
 navegador = webdriver.Chrome(service=service, options=options)
 wait = WebDriverWait(navegador, 10)
 
@@ -72,9 +74,9 @@ threading.Thread(target=iniciar_flask, daemon=True).start()
 try:
     navegador.get("https://suap.ifac.edu.br")
     
-    inputUsuario = wait.until(EC.presence_of_element_located((By.ID, "id_username"))) 
+    inputUsuario = wait.until(EC.presence_of_element_located((By.XPATH, "//*[@id='id_username']"))) 
     inputUsuario.send_keys(usuario)
-    inputSenha = navegador.find_element(By.ID, "id_password")
+    inputSenha = navegador.find_element(By.XPATH, "//*[@id='id_password']")
     inputSenha.send_keys(senha)
 
     btAcessar = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input.btn.success")))
@@ -87,10 +89,12 @@ try:
 
     acessoChamados= tempo2.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "#menu-item-centraldeserviços_chamados")))
     acessoChamados.click()
+    btDiminuirFiltros = wait.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='content']/div[4]/div/h2/button")))
+    btDiminuirFiltros.click()
     x_path_total_chamados = ''
     
     try:
-        elemento_total = navegador.find_element(By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")
+        elemento_total = navegador.find_element(By.XPATH, By.XPATH, '//*[@id="chamados"]/div/ul[1]/li[contains(normalize-space(.),"Total de")]')
         texto_anterior = elemento_total.text.strip()
 
     except NoSuchElementException:
@@ -112,7 +116,7 @@ try:
         time.sleep(2)  # espera rápida para o site recarregar
 
         try:
-            elemento_total = tempo2.until(EC.presence_of_element_located((By.XPATH, "//li[@class='disabled' and contains(text(),'Total de')]")))
+            elemento_total = tempo2.until(By.XPATH, '//*[@id="chamados"]/div/ul[1]/li[contains(normalize-space(.),"Total de")]')
             texto_atual = elemento_total.text.strip()
         except TimeoutException:
             texto_atual = "Total de 0 item"
